@@ -2,10 +2,21 @@ import React, { useEffect } from "react";
 // import p5svg from "p5.js-svg";
 import { button, useControls } from "leva";
 import dynamic from "next/dynamic";
-import Sketch from "react-p5";
 
-export default function P5Component({ lineColor }) {
+const Sketch = dynamic(() => import("react-p5").then((mod) => mod.Sketch), {
+  ssr: false,
+});
+
+export default function P5Component() {
   const p5Ref = React.useRef(null);
+
+  useEffect(() => {
+    const awaitImport = async () => {
+      const p5Svg = (await import("p5.js-svg")).default;
+    };
+    awaitImport();
+  }, []);
+
   const [data, set] = useControls("Imagem", () => ({
     Atualizar: button((set) => p5Ref.current.redraw(), {
       label: "Atualizar",
