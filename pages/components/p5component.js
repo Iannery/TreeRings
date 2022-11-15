@@ -3,6 +3,8 @@ import { button, useControls } from "leva";
 import dynamic from "next/dynamic";
 
 export default function P5Component() {
+  const [posX, setPosX] = React.useState(-1);
+  const [posY, setPosY] = React.useState(-1);
   const Sketch = dynamic(() => import("react-p5"), {
     ssr: false,
   });
@@ -12,11 +14,10 @@ export default function P5Component() {
     Atualizar: button((set) => p5Ref.current.redraw(), {
       label: "Atualizar",
     }),
-
     Qtd: {
-      value: 40,
-      min: -1,
-      max: 100,
+      value: 75,
+      min: 30,
+      max: 200,
       step: 1,
     },
     Espessura: {
@@ -24,6 +25,14 @@ export default function P5Component() {
       min: 0.01,
       max: 3,
       step: 0.01,
+      label: "Espessura",
+    },
+    Distancia: {
+      value: 4,
+      min: 2,
+      max: 20,
+      step: 0.1,
+      label: "Distância",
     },
     Caos: {
       value: 0.015,
@@ -33,13 +42,16 @@ export default function P5Component() {
     },
     Cor: {
       value: "rgba(0,0,0,0.5)",
-      label: "Cor da linha",
+      label: "Cor",
     },
     Default: button(() => {
-      set({ Qtd: 40 });
+      set({ Qtd: 75 });
       set({ Espessura: 0.8 });
+      set({ Distancia: 4 });
       set({ Caos: 0.015 });
       set({ Cor: "rgba(0,0,0,0.5)" });
+      setPosX(-1);
+      setPosY(-1);
     }),
   }));
   useControls("Exportar", () => ({
@@ -47,7 +59,7 @@ export default function P5Component() {
       p5Ref.current.saveCanvas("aneis", "png");
     }),
 
-    "Exportar JSON": button((set) => downloadJson()),
+    "Copiar JSON gerador de SVG": button((set) => copyJsonToClipboard()),
   }));
 
   const downloadJson = () => {
@@ -64,12 +76,20 @@ export default function P5Component() {
     element.click();
   };
 
+  const copyJsonToClipboard = () => {
+    navigator.clipboard.writeText(JSON.stringify(exportData));
+    // alert("Copiado para a área de transferência!");
+    // show modal
+
+    document.getElementById("my-modal-4").checked = true;
+  };
+
   var npts = 1000;
   var Z0 = 0;
   var L;
   var nrings = data.Qtd;
   var wiggelParam = data.Caos;
-  var sc = 4;
+  var sc = data.Distancia;
   var rad;
   const exportData = {};
 
@@ -86,24 +106,31 @@ export default function P5Component() {
 
   const setup = (p5, canvasParentRef) => {
     p5Ref.current = p5;
-    // p5Svg
     p5.createCanvas(p5.windowHeight, p5.windowHeight).parent(canvasParentRef);
     p5.clear();
     p5.noFill();
 
     p5.noLoop();
-    rad = 160 * sc;
+    rad = 2 * p5.width;
   };
   // Function to draw the wave
   const draw = (p5) => {
-    rad = 160 * sc;
+    rad = 2 * p5.width;
+
     exportData.rings.splice(0, exportData.rings.length); // clear the array
-    p5.translate(p5.width / 2, p5.height / 2);
+    if (posX === -1 && posY === -1) {
+      exportData.posX = p5.width / 2;
+      exportData.posY = p5.height / 2;
+      p5.translate(p5.width / 2, p5.height / 2);
+    } else {
+      exportData.posX = posX;
+      exportData.posY = posY;
+      p5.translate(posX, posY);
+    }
 
     //Second outer ring
     rad = rad - sc * 10;
     p5.clear();
-    drawRing(rad, p5);
     p5.noFill();
     // p5.fill(bg);
     p5.stroke(ri);
@@ -154,5 +181,17 @@ export default function P5Component() {
     p5.endShape();
   };
 
-  return <Sketch setup={setup} draw={draw} />;
+  const mousePressed = (p5) => {
+    if (
+      p5.mouseX > 0 &&
+      p5.mouseX < p5.width &&
+      p5.mouseY > 0 &&
+      p5.mouseY < p5.height
+    ) {
+      setPosX(p5.mouseX);
+      setPosY(p5.mouseY);
+    }
+  };
+
+  return <Sketch setup={setup} draw={draw} mousePressed={mousePressed} />;
 }
