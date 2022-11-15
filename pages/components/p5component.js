@@ -8,7 +8,7 @@ export default function P5Component() {
   });
   const p5Ref = React.useRef(null);
 
-  const [data, set] = useControls("Imagem", () => ({
+  const [data, set] = useControls("Manipular", () => ({
     Atualizar: button((set) => p5Ref.current.redraw(), {
       label: "Atualizar",
     }),
@@ -41,7 +41,13 @@ export default function P5Component() {
       set({ Caos: 0.015 });
       set({ Cor: "rgba(0,0,0,0.5)" });
     }),
-    Exportar: button((set) => downloadJson()),
+  }));
+  useControls("Exportar", () => ({
+    "Exportar Imagem": button(() => {
+      p5Ref.current.saveCanvas("aneis", "png");
+    }),
+
+    "Exportar JSON": button((set) => downloadJson()),
   }));
 
   const downloadJson = () => {
@@ -83,6 +89,8 @@ export default function P5Component() {
     // p5Svg
     p5.createCanvas(p5.windowHeight, p5.windowHeight).parent(canvasParentRef);
     p5.clear();
+    p5.noFill();
+
     p5.noLoop();
     rad = 160 * sc;
   };
