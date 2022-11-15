@@ -59,7 +59,8 @@ export default function P5Component() {
       p5Ref.current.saveCanvas("aneis", "png");
     }),
 
-    "Copiar JSON gerador de SVG": button((set) => copyJsonToClipboard()),
+    "Exportar JSON": button(() => downloadJson()),
+    // "Copiar JSON gerador de SVG": button((set) => copyJsonToClipboard()),
   }));
 
   const downloadJson = () => {
