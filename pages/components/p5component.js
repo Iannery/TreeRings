@@ -95,9 +95,9 @@ export default function P5Component() {
   const exportData = {};
 
   exportData.npts = npts;
-  exportData.nrings = nrings;
-  exportData.wiggelParam = wiggelParam;
-  exportData.sc = sc;
+  exportData.nrings = data.Qtd;
+  exportData.wiggelParam = data.Caos;
+  exportData.sc = data.Distancia;
   exportData.color = data.Cor;
   exportData.width = sc * 0.4 * data.Espessura;
   exportData.rings = [];
@@ -117,6 +117,7 @@ export default function P5Component() {
   // Function to draw the wave
   const draw = (p5) => {
     rad = 2 * p5.width;
+    set({ Qtd: Math.round(p5.width * 0.121) });
 
     exportData.rings.splice(0, exportData.rings.length); // clear the array
     if (posX === -1 && posY === -1) {
