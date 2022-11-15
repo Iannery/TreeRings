@@ -1,27 +1,17 @@
 import React, { useEffect } from "react";
-// import p5svg from "p5.js-svg";
 import { button, useControls } from "leva";
 import dynamic from "next/dynamic";
 
-const Sketch = dynamic(() => import("react-p5").then((mod) => mod.Sketch), {
-  ssr: false,
-});
-
 export default function P5Component() {
+  const Sketch = dynamic(() => import("react-p5"), {
+    ssr: false,
+  });
   const p5Ref = React.useRef(null);
-
-  useEffect(() => {
-    const awaitImport = async () => {
-      const p5Svg = (await import("p5.js-svg")).default;
-    };
-    awaitImport();
-  }, []);
 
   const [data, set] = useControls("Imagem", () => ({
     Atualizar: button((set) => p5Ref.current.redraw(), {
       label: "Atualizar",
     }),
-    // ExportarSvg: button((set) => p5Ref.current.save("mySVG.svg")),
 
     Qtd: {
       value: 40,
@@ -51,11 +41,22 @@ export default function P5Component() {
       set({ Caos: 0.015 });
       set({ Cor: "rgba(0,0,0,0.5)" });
     }),
-    Exportar: button((set) => p5Ref.current.save("AneisTronco.svg")),
+    Exportar: button((set) => downloadJson()),
   }));
-  // const setup = (p5, canvasParentRef) => {
-  //
-  // };
+
+  const downloadJson = () => {
+    const element = document.createElement("a");
+
+    const file = new Blob([JSON.stringify(exportData)], {
+      type: "text/json",
+    });
+
+    element.href = URL.createObjectURL(file);
+    element.download = "data.json";
+    document.body.appendChild(element); // Required for this to work in FireFox
+
+    element.click();
+  };
 
   var npts = 1000;
   var Z0 = 0;
@@ -64,6 +65,15 @@ export default function P5Component() {
   var wiggelParam = data.Caos;
   var sc = 4;
   var rad;
+  const exportData = {};
+
+  exportData.npts = npts;
+  exportData.nrings = nrings;
+  exportData.wiggelParam = wiggelParam;
+  exportData.sc = sc;
+  exportData.color = data.Cor;
+  exportData.width = sc * 0.4 * data.Espessura;
+  exportData.rings = [];
 
   // Colors
   var ri = data.Cor;
@@ -71,11 +81,7 @@ export default function P5Component() {
   const setup = (p5, canvasParentRef) => {
     p5Ref.current = p5;
     // p5Svg
-    const p5Svg = require("p5.js-svg");
-    // p5Svg(p5);
-    p5.createCanvas(p5.windowHeight, p5.windowHeight, p5.SVG).parent(
-      canvasParentRef
-    );
+    p5.createCanvas(p5.windowHeight, p5.windowHeight).parent(canvasParentRef);
     p5.clear();
     p5.noLoop();
     rad = 160 * sc;
@@ -83,6 +89,7 @@ export default function P5Component() {
   // Function to draw the wave
   const draw = (p5) => {
     rad = 160 * sc;
+    exportData.rings.splice(0, exportData.rings.length); // clear the array
     p5.translate(p5.width / 2, p5.height / 2);
 
     //Second outer ring
@@ -113,6 +120,10 @@ export default function P5Component() {
   };
 
   const drawRing = (rad, p5) => {
+    const ring = {};
+    ring.rad = rad;
+    ring.Z0 = Z0;
+    ring.payload = [];
     var L = 0;
     p5.beginShape();
     for (var i = 0; i <= npts; i++) {
@@ -124,7 +135,14 @@ export default function P5Component() {
 
       p5.vertex(X, Y);
       L = L + p5.TWO_PI / npts;
+      let object = {
+        x: X,
+        y: Y,
+        l: L,
+      };
+      ring.payload.push(object);
     }
+    exportData.rings.push(ring);
     p5.endShape();
   };
 

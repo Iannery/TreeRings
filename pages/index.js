@@ -4,12 +4,9 @@ import { button, useControls } from "leva";
 import { Suspense } from "react";
 
 import { useEffect, useState } from "react";
-const DynamicComponent = dynamic(
-  () => import("./components/p5component.js").then((mod) => mod.P5Component),
-  {
-    ssr: false,
-  }
-);
+const P5Component = dynamic(() => import("./components/p5component.js"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [data, set] = useControls(() => ({
@@ -28,7 +25,7 @@ export default function Home() {
         <title>Anéis de Árvores</title>
       </Head>
       <div className="container flex h-auto items-center justify-center">
-        <DynamicComponent />
+        <P5Component />
       </div>
     </div>
   );
