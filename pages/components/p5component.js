@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 export default function P5Component() {
   const [posX, setPosX] = React.useState(-1);
   const [posY, setPosY] = React.useState(-1);
+  const [renderedOnce, setRenderedOnce] = React.useState(false);
+
   const Sketch = dynamic(() => import("react-p5"), {
     ssr: false,
   });
@@ -14,9 +16,21 @@ export default function P5Component() {
     Atualizar: button((set) => p5Ref.current.redraw(), {
       label: "Atualizar",
     }),
+    Largura: {
+      value: 800,
+      min: 100,
+      max: 1500,
+      step: 1,
+    },
+    Altura: {
+      value: 800,
+      min: 100,
+      max: 1500,
+      step: 1,
+    },
     Qtd: {
       value: 75,
-      min: 30,
+      min: 0,
       max: 200,
       step: 1,
     },
@@ -45,11 +59,15 @@ export default function P5Component() {
       label: "Cor",
     },
     Default: button(() => {
-      set({ Qtd: 75 });
-      set({ Espessura: 0.8 });
-      set({ Distancia: 4 });
-      set({ Caos: 0.015 });
-      set({ Cor: "rgba(0,0,0,0.5)" });
+      set({
+        Largura: p5Ref.current.windowHeight,
+        Altura: p5Ref.current.windowHeight,
+        Qtd: Math.round(p5Ref.current.windowHeight * 0.121),
+        Espessura: 0.8,
+        Distancia: 4,
+        Caos: 0.015,
+        Cor: "rgba(0,0,0,0.5)",
+      });
       setPosX(-1);
       setPosY(-1);
     }),
@@ -85,6 +103,16 @@ export default function P5Component() {
     document.getElementById("my-modal-4").checked = true;
   };
 
+  useEffect(() => {
+    if (renderedOnce) {
+      set({
+        Largura: p5Ref.current.windowHeight,
+        Altura: p5Ref.current.windowHeight,
+        Qtd: Math.round(p5Ref.current.windowHeight * 0.121),
+      });
+    }
+  }, [renderedOnce, set]);
+
   var npts = 1000;
   var Z0 = 0;
   var L;
@@ -95,6 +123,8 @@ export default function P5Component() {
   const exportData = {};
 
   exportData.npts = npts;
+  exportData.largura = data.Largura;
+  exportData.altura = data.Altura;
   exportData.nrings = data.Qtd;
   exportData.wiggelParam = data.Caos;
   exportData.sc = data.Distancia;
@@ -107,17 +137,20 @@ export default function P5Component() {
 
   const setup = (p5, canvasParentRef) => {
     p5Ref.current = p5;
-    p5.createCanvas(p5.windowHeight, p5.windowHeight).parent(canvasParentRef);
+    p5.createCanvas(data.Largura, data.Altura).parent(canvasParentRef);
     p5.clear();
     p5.noFill();
 
+    if (!renderedOnce) {
+      setRenderedOnce(true);
+    }
+
     p5.noLoop();
-    rad = 2 * p5.width;
+    rad = 0;
   };
   // Function to draw the wave
   const draw = (p5) => {
-    rad = 2 * p5.width;
-    set({ Qtd: Math.round(p5.width * 0.121) });
+    rad = 0;
 
     exportData.rings.splice(0, exportData.rings.length); // clear the array
     if (posX === -1 && posY === -1) {
