@@ -29,10 +29,17 @@ export default function P5Component() {
       step: 1,
     },
     Qtd: {
-      value: 75,
+      value: Math.round(window.innerHeight * 0.121),
       min: 0,
       max: 200,
       step: 1,
+    },
+    InnerRing: {
+      value: 0,
+      min: 0,
+      max: 10,
+      step: 1,
+      label: "Anel Interno",
     },
     Espessura: {
       value: 0.8,
@@ -62,7 +69,8 @@ export default function P5Component() {
       set({
         Largura: window.innerHeight,
         Altura: window.innerHeight,
-        Qtd: Math.round(p5Ref.current.windowHeight * 0.121),
+        Qtd: Math.round(window.innerHeight * 0.121),
+        InnerRing: 0,
         Espessura: 0.8,
         Distancia: 4,
         Caos: 0.015,
@@ -82,6 +90,15 @@ export default function P5Component() {
   }));
 
   const downloadJson = () => {
+    exportData.npts = npts;
+    exportData.largura = get("Largura");
+    exportData.altura = get("Altura");
+    exportData.qtd = get("Qtd");
+    exportData.innerRing = get("InnerRing");
+    exportData.espessura = get("Espessura");
+    exportData.sc = get("Distancia");
+    exportData.caos = get("Caos");
+    exportData.color = get("Cor");
     const element = document.createElement("a");
 
     const file = new Blob([JSON.stringify(exportData)], {
@@ -120,16 +137,8 @@ export default function P5Component() {
   var wiggelParam = data.Caos;
   var sc = data.Distancia;
   var rad;
-  const exportData = {};
 
-  exportData.npts = npts;
-  exportData.largura = data.Largura;
-  exportData.altura = data.Altura;
-  exportData.nrings = data.Qtd;
-  exportData.wiggelParam = data.Caos;
-  exportData.sc = data.Distancia;
-  exportData.color = data.Cor;
-  exportData.width = sc * 0.4 * data.Espessura;
+  const exportData = {};
   exportData.rings = [];
 
   // Colors
@@ -172,7 +181,9 @@ export default function P5Component() {
     for (var i = 0; i < nrings; i++) {
       rad = rad - sc * 4 - sc * p5.randomGaussian();
       p5.strokeWeight(sc * 0.4 * data.Espessura);
-      drawRing(rad, p5);
+      if (i > data.InnerRing) {
+        drawRing(rad, p5);
+      }
       Z0 = Z0 + 0.03;
     }
 
