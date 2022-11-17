@@ -12,20 +12,20 @@ export default function P5Component() {
   });
   const p5Ref = React.useRef(null);
 
-  const [data, set] = useControls("Manipular", () => ({
+  const [data, set, get] = useControls("Manipular", () => ({
     Atualizar: button((set) => p5Ref.current.redraw(), {
       label: "Atualizar",
     }),
     Largura: {
-      value: 800,
+      value: window.innerHeight,
       min: 100,
-      max: 1500,
+      max: window.innerHeight,
       step: 1,
     },
     Altura: {
-      value: 800,
+      value: window.innerHeight,
       min: 100,
-      max: 1500,
+      max: window.innerHeight,
       step: 1,
     },
     Qtd: {
@@ -60,8 +60,8 @@ export default function P5Component() {
     },
     Default: button(() => {
       set({
-        Largura: p5Ref.current.windowHeight,
-        Altura: p5Ref.current.windowHeight,
+        Largura: window.innerHeight,
+        Altura: window.innerHeight,
         Qtd: Math.round(p5Ref.current.windowHeight * 0.121),
         Espessura: 0.8,
         Distancia: 4,
@@ -164,7 +164,7 @@ export default function P5Component() {
     }
 
     //Second outer ring
-    rad = rad - sc * 10;
+    // rad = rad - sc * 10;
     p5.clear();
     p5.noFill();
     // p5.fill(bg);

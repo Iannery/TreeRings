@@ -24,7 +24,7 @@ export default function Home() {
       <Head>
         <title>Anéis de Árvores</title>
       </Head>
-      <div className="container flex h-auto items-center justify-center">
+      <div className="container flex h-screen items-center justify-center">
         <P5Component />
       </div>
 
