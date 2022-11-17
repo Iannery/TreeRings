@@ -5,6 +5,11 @@ import dynamic from "next/dynamic";
 export default function P5Component() {
   const [posX, setPosX] = React.useState(-1);
   const [posY, setPosY] = React.useState(-1);
+  const [dimensions, setDimensions] = React.useState({
+    width: 800,
+    height: 800,
+  });
+
   const [renderedOnce, setRenderedOnce] = React.useState(false);
 
   const Sketch = dynamic(() => import("react-p5"), {
@@ -12,74 +17,85 @@ export default function P5Component() {
   });
   const p5Ref = React.useRef(null);
 
-  const [data, set, get] = useControls("Manipular", () => ({
-    Atualizar: button((set) => p5Ref.current.redraw(), {
-      label: "Atualizar",
+  useEffect(() => {
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }, []);
+
+  const [data, set, get] = useControls(
+    "Manipular",
+    () => ({
+      Atualizar: button((set) => p5Ref.current.redraw(), {
+        label: "Atualizar",
+      }),
+      Largura: {
+        value: dimensions.height,
+        min: 100,
+        max: dimensions.height,
+        step: 1,
+      },
+      Altura: {
+        value: dimensions.height,
+        min: 100,
+        max: dimensions.height,
+        step: 1,
+      },
+      Qtd: {
+        value: Math.round(dimensions.height * 0.121),
+        min: 0,
+        max: 200,
+        step: 1,
+      },
+      InnerRing: {
+        value: 0,
+        min: 0,
+        max: 10,
+        step: 1,
+        label: "Anel Interno",
+      },
+      Espessura: {
+        value: 0.8,
+        min: 0.01,
+        max: 3,
+        step: 0.01,
+        label: "Espessura",
+      },
+      Distancia: {
+        value: 4,
+        min: 2,
+        max: 20,
+        step: 0.1,
+        label: "Distância",
+      },
+      Caos: {
+        value: 0.015,
+        min: 0.001,
+        max: 0.03,
+        step: 0.001,
+      },
+      Cor: {
+        value: "rgba(0,0,0,0.5)",
+        label: "Cor",
+      },
+      Default: button(() => {
+        set({
+          Largura: window.innerHeight,
+          Altura: window.innerHeight,
+          Qtd: Math.round(window.innerHeight * 0.121),
+          InnerRing: 0,
+          Espessura: 0.8,
+          Distancia: 4,
+          Caos: 0.015,
+          Cor: "rgba(0,0,0,0.5)",
+        });
+        setPosX(-1);
+        setPosY(-1);
+      }),
     }),
-    Largura: {
-      value: window.innerHeight,
-      min: 100,
-      max: window.innerHeight,
-      step: 1,
-    },
-    Altura: {
-      value: window.innerHeight,
-      min: 100,
-      max: window.innerHeight,
-      step: 1,
-    },
-    Qtd: {
-      value: Math.round(window.innerHeight * 0.121),
-      min: 0,
-      max: 200,
-      step: 1,
-    },
-    InnerRing: {
-      value: 0,
-      min: 0,
-      max: 10,
-      step: 1,
-      label: "Anel Interno",
-    },
-    Espessura: {
-      value: 0.8,
-      min: 0.01,
-      max: 3,
-      step: 0.01,
-      label: "Espessura",
-    },
-    Distancia: {
-      value: 4,
-      min: 2,
-      max: 20,
-      step: 0.1,
-      label: "Distância",
-    },
-    Caos: {
-      value: 0.015,
-      min: 0.001,
-      max: 0.03,
-      step: 0.001,
-    },
-    Cor: {
-      value: "rgba(0,0,0,0.5)",
-      label: "Cor",
-    },
-    Default: button(() => {
-      set({
-        Largura: window.innerHeight,
-        Altura: window.innerHeight,
-        Qtd: Math.round(window.innerHeight * 0.121),
-        InnerRing: 0,
-        Espessura: 0.8,
-        Distancia: 4,
-        Caos: 0.015,
-        Cor: "rgba(0,0,0,0.5)",
-      });
-      setPosX(-1);
-      setPosY(-1);
-    }),
-  }));
+    [dimensions]
+  );
   useControls("Exportar", () => ({
     "Exportar Imagem": button(() => {
       p5Ref.current.saveCanvas("aneis", "png");
