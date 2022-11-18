@@ -24,9 +24,11 @@ export default function Home() {
       <Head>
         <title>Anéis de Árvores</title>
       </Head>
-      <div className="container flex h-screen items-center justify-center">
+      {/* <div className="container flex h-screen items-center justify-center"> */}
+      <div className="container absolute h-auto items-center justify-center">
         <P5Component />
       </div>
+      <div className="container flex h-screen items-center justify-center"></div>
 
       <input type="checkbox" id="my-modal-4" className="modal-toggle" />
       <label htmlFor="my-modal-4" className="modal cursor-pointer">

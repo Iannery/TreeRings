@@ -12,9 +12,16 @@ export default function P5Component() {
 
   const [renderedOnce, setRenderedOnce] = React.useState(false);
 
-  const Sketch = dynamic(() => import("react-p5"), {
-    ssr: false,
-  });
+  const Sketch = dynamic(
+    () =>
+      import("react-p5").then((mod) => {
+        require("p5.js-svg");
+        return mod.default;
+      }),
+    {
+      ssr: false,
+    }
+  );
   const p5Ref = React.useRef(null);
 
   useEffect(() => {
@@ -93,6 +100,9 @@ export default function P5Component() {
         setPosX(-1);
         setPosY(-1);
       }),
+      "Parar Loop": button(() => {
+        p5Ref.current.noLoop();
+      }),
     }),
     [dimensions]
   );
@@ -101,8 +111,9 @@ export default function P5Component() {
       p5Ref.current.saveCanvas("aneis", "png");
     }),
 
-    "Exportar JSON": button(() => downloadJson()),
+    // "Exportar JSON": button(() => downloadJson()),
     // "Copiar JSON gerador de SVG": button((set) => copyJsonToClipboard()),
+    "Exportar SVG": button(() => downloadSvg()),
   }));
 
   const downloadJson = () => {
@@ -136,12 +147,21 @@ export default function P5Component() {
     document.getElementById("my-modal-4").checked = true;
   };
 
+  const downloadSvg = () => {
+    p5Ref.current.save("aneis.svg");
+  };
+
   useEffect(() => {
     if (renderedOnce) {
+      // set({
+      //   Largura: p5Ref.current.windowHeight,
+      //   Altura: p5Ref.current.windowHeight,
+      //   Qtd: Math.round(p5Ref.current.windowHeight * 0.121),
+      // });
       set({
-        Largura: p5Ref.current.windowHeight,
-        Altura: p5Ref.current.windowHeight,
-        Qtd: Math.round(p5Ref.current.windowHeight * 0.121),
+        Largura: 100,
+        Altura: 100,
+        Qtd: 5,
       });
     }
   }, [renderedOnce, set]);
@@ -162,15 +182,11 @@ export default function P5Component() {
 
   const setup = (p5, canvasParentRef) => {
     p5Ref.current = p5;
-    p5.createCanvas(data.Largura, data.Altura).parent(canvasParentRef);
-    p5.clear();
-    p5.noFill();
+    p5.createCanvas(data.Largura, data.Altura, p5.SVG).parent(canvasParentRef);
 
     if (!renderedOnce) {
       setRenderedOnce(true);
     }
-
-    p5.noLoop();
     rad = 0;
   };
   // Function to draw the wave
@@ -239,6 +255,7 @@ export default function P5Component() {
       };
       ring.payload.push(object);
     }
+    console.log(ring);
     exportData.rings.push(ring);
     p5.endShape();
   };
